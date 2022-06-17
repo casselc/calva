@@ -1,5 +1,7 @@
 import * as printer from '../printer';
 import * as replSession from '../nrepl/repl-session';
+import * as outputWindow from '../results-output/results-doc';
+import * as evaluate from '../evaluate';
 import { cljsLib } from '../utilities';
 
 type Result = {
@@ -9,6 +11,13 @@ type Result = {
   errorOutput: string;
 };
 
+type ReplSessionType = 'clj' | 'cljs' | 'cljc' | undefined;
+
+
+export async function evaluateCodeInSession(code:string, sessionKey : ReplSessionType = currentSessionKey(), options : any = {}) {
+  return await evaluate.evaluateInOutputWindow(code, sessionKey, currentSessionNs(), options);
+}
+ 
 export const evaluateCode = async (
   sessionKey: 'clj' | 'cljs' | 'cljc' | undefined,
   code: string,
@@ -44,6 +53,10 @@ export const evaluateCode = async (
   };
 };
 
-export const currentSessionKey = () => {
-  return replSession.getReplSessionType(cljsLib.getStateValue('connected'));
+export const currentSessionKey = () : ReplSessionType => {
+  return <ReplSessionType> replSession.getReplSessionType(cljsLib.getStateValue('connected'));
 };
+
+export const currentSessionNs = () => {
+  return outputWindow.getNs();
+}
